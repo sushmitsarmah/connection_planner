@@ -47,7 +47,7 @@
 <script type="text/javascript">
 	
 d3.json("orgchart.json",function(data){
-	console.log(data);
+	// console.log(data);
 
 	var depts = ["Fiduciary", "C-Level", "Highly Integrated", "Operational Delivery", "Facilities", "Our Connections"];
 
@@ -76,7 +76,7 @@ d3.json("orgchart.json",function(data){
 		count++;
 		return {Name:d,Type:new_list[5].Type,Role:"",Title:"","id":id};
 	});
-	console.log(new_list);
+	// console.log(new_list);
 
 	var people = _.flatten(_.pluck(new_list,"People"));
 
@@ -191,6 +191,10 @@ d3.json("orgchart.json",function(data){
 			var source_y = parseFloat(d3.select("#"+d.source).attr("data-y"))+parseFloat(d3.select("#"+d.source).attr("dy"));
 			var target_x = parseFloat(d3.select("#"+d.target).attr("data-x"))+parseFloat(d3.select("#"+d.target).attr("dx"));
 			var target_y = parseFloat(d3.select("#"+d.target).attr("data-y"))+parseFloat(d3.select("#"+d.target).attr("dy"));
+
+			if (["id9","id10"].indexOf(d.source) != -1){
+				source_x += 120;
+			}
 
 			return "M"+source_x+","+source_y+"L"+target_x+","+target_y+"Z";			
 		})
