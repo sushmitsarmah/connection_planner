@@ -46,7 +46,7 @@
 <script type="text/javascript" src="underscore.js"></script>
 <script type="text/javascript">
 	
-d3.json("orgchart.json",function(data){
+d3.json("http://connectionplanner.apiary-mock.com/orgchart/1",function(data){
 	// console.log(data);
 
 	var depts = ["Fiduciary", "C-Level", "Highly Integrated", "Operational Delivery", "Facilities", "Our Connections"];
@@ -90,6 +90,7 @@ d3.json("orgchart.json",function(data){
 	var margin = {top:40,bottom:40,right:40,left:40},
 		width = 1340 - margin.right - margin.left,
 		height = 670 - margin.top - margin.bottom;
+
 
 	var block = {width:400,height:100};
 
@@ -267,7 +268,6 @@ d3.json("orgchart.json",function(data){
 	.attr("dy",function(d,i){ return i*20 + 40})
 	.attr("dx","20px")
 	.text(function(d){ return d.replace("<p>","")});
-
 
 
 
