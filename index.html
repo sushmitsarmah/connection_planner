@@ -4,7 +4,7 @@
 	<title>Connection Planner</title>
 	<style type="text/css">
 
-.block rect, .project_delivery rect, .legend rect {
+.block rect, .project_delivery rect, .legend rect, .notes rect {
 	stroke-width: 1px;
 	stroke:black;
 	fill:none;
@@ -30,6 +30,10 @@
 .weak {
 	stroke-width: 0.5;
 	stroke-dasharray: 1,2;
+}
+
+.boxheading {
+	font-weight:bold;
 }
 
 	</style>
@@ -106,12 +110,14 @@ d3.json("orgchart.json",function(data){
 		.append("text")
 		.attr("dy","20px")
 		.attr("dx",(block.width-100)/4)
+		.classed("boxheading",true)
 		.text("Project Delivery Partners");
 
 	project_delivery
 		.append("text")
 		.attr("dy","40px")
 		.attr("dx",(block.width-100)/4 + 20)
+		.classed("boxheading",true)
 		.text("Project Participants");	
 
 	project_delivery.selectAll(".people_delivery")
@@ -156,7 +162,7 @@ d3.json("orgchart.json",function(data){
 		.attr("ry","20px");
 
 	typeblock.append("text")
-		.classed("heading",true)
+		.classed("boxheading",true)
 		.text(function(d){ return d.Type})
 		.attr("dy","20px")
 		.attr("dx",block.width/3);
@@ -206,6 +212,7 @@ d3.json("orgchart.json",function(data){
 		.append("text")
 		.attr("dy","20px")
 		.attr("dx",block.width/4)
+		.classed("boxheading",true)
 		.text("Legend");
 
 	legend.append("rect")
@@ -231,6 +238,32 @@ d3.json("orgchart.json",function(data){
 		.attr("dx","110px")
 		.attr("dy",function(d,i){ return i*20})
 		.text(String);
+
+	//Notes
+
+	var notes = svg.append("g")
+			.attr("class","notes")
+			.attr("transform","translate(900,0)");
+
+	notes
+		.append("text")
+		.attr("dy","20px")
+		.attr("dx",block.width/4)
+		.classed("boxheading",true)
+		.text("Notes");
+
+	notes.append("rect")
+		.attr("width",block.width)
+		.attr("height",block.height);
+
+	notes.selectAll(".notestext")
+	.data(data.Notes.split("</p>"))
+	.enter().append("text")
+	.attr("class","notestext")
+	.attr("dy",function(d,i){ return i*20 + 40})
+	.attr("dx","20px")
+	.text(function(d){ return d.replace("<p>","")});
+
 
 
 
