@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Connection Planner</title>
+	<style type="text/css">
+
+.block rect {
+	stroke-width: 1px;
+	stroke:black;
+	fill:none;
+}
+
+.decision-maker {
+	font-weight:bold;
+	fill: yellow;
+}
+
+.navigator {
+	fill: red;
+}
+
+.champion {
+	fill:blue;
+}
+
+.strong {
+	stroke-width: 3;
+}
+
+.weak {
+	stroke-width: 0.5;
+	stroke-dasharray: 1,2;
+}
+
+	</style>
+</head>
+<body>
+
+<div id="chart"></div>
+
+<script type="text/javascript" src="d3.min.js"></script>
+<script type="text/javascript" src="underscore.js"></script>
+<script type="text/javascript">
+	
+d3.json("orgchart.json",function(data){
+	console.log(data);
+
+	var depts = ["Fiduciary", "C-Level", "Highly Integrated", "Operational Delivery", "Facilities", "Our Connections"];
+
+	var count = 1;
+
+	data.People = data.People.map(function(d){
+		d.id = "id"+count;
+		count++;
+		return d;
+	});
+
+	var new_list = [];
+
+	depts.forEach(function(dept){
+		var temp = {};
+		var people = data.People.filter(function(d){
+						return d.Type == dept;
+					});
+		temp["Type"] = dept;
+		temp["People"] = people;
+		new_list.push(temp);
+	}); 
+
+	new_list[5].People = _.uniq(_.pluck(data.Relationships,"Us")).map(function(d){ 
+		var id = "id"+count;
+		count++;
+		return {Name:d,Type:new_list[5].Type,Role:"",Title:"","id":id};
+	});
+	console.log(new_list);
+
+	var people = _.flatten(_.pluck(new_list,"People"));
+
+	data.Relationships = data.Relationships.map(function(d){
+		d.source = people.filter(function(k){ return k.Name == d.Us})[0].id;
+		d.target = people.filter(function(k){ return k.Name == d.Them})[0].id;
+		return d;
+	});
+
+	console.log(data.Relationships);
+
+	var margin = {top:40,bottom:40,right:40,left:40},
+		width = 1200 - margin.right - margin.left,
+		height = 570 - margin.top - margin.bottom;
+
+	var block = {width:400,height:100};
+
+	var svg = d3.select("#chart").append("svg")
+				.attr("width",width+margin.left+margin.right)
+				.attr("height",height+margin.top+margin.bottom)
+				.append("g")
+				.attr("transform","translate("+margin.left+","+margin.top+")");
+
+	var typeblock = svg.selectAll(".block")
+				.data(new_list)
+			.enter().append("g")
+				.attr("class","block")
+				.attr("transform",function(d,i){
+					var temp_height, temp_width;
+					if(d.Type == "Operational Delivery"){
+						temp_height = (i-1)*120;
+						temp_width = (width/3) + 250;
+					} else if (d.Type == "Our Connections"){
+						temp_height = (i-2)*120;
+						temp_width = (width/3) - 400;						
+					} else if ( d.Type == "Highly Integrated"){
+						temp_width = (width/3) - 250;
+						temp_height = i*120;
+					} else if ( d.Type == "Facilities"){
+						temp_width = (width/3) + 50;
+						temp_height = (i-1)*120;
+					} else {
+						temp_height = i*120;
+						temp_width = width/3;
+					}
+					return "translate("+temp_width+","+temp_height+")";
+				});
+
+	typeblock.append("rect")
+		.attr("width",block.width)
+		.attr("height",block.height)
+		.attr("rx","20px")
+		.attr("ry","20px");
+
+	typeblock.append("text")
+		.classed("heading",true)
+		.text(function(d){ return d.Type})
+		.attr("dy","20px")
+		.attr("dx",block.width/3);
+
+	typeblock.selectAll(".people")
+		.data(function(d){ return d.People})
+		.enter().append("text")
+		.attr("class","people")
+		.attr("id",function(d){ return d.id})
+		.classed("champion",function(d){ return (d.Role == "Champion") })
+		.classed("decision-maker",function(d){ return (d.Role == "Decision Maker") })
+		.classed("navigator",function(d){ return (d.Role == "Navigator") })
+		.attr("dx","20px")
+		.attr("dy",function(d,i){ return i*20 + 50})
+		.attr("data-x",function(d){ return d3.transform(d3.select(this.parentNode).attr("transform")).translate[0]; })
+		.attr("data-y",function(d){ return d3.transform(d3.select(this.parentNode).attr("transform")).translate[1]; })
+		.text(function(d){ 
+			return d.Name+". "+d.Title
+		});
+
+	svg.selectAll("path")
+		.data(data.Relationships)
+	.enter().append("path")
+		.attr("d",function(d){
+			console.log(d);
+			var source_x = parseFloat(d3.select("#"+d.source).attr("data-x"))+parseFloat(d3.select("#"+d.source).attr("dx"));
+			var source_y = parseFloat(d3.select("#"+d.source).attr("data-y"))+parseFloat(d3.select("#"+d.source).attr("dy"));
+			var target_x = parseFloat(d3.select("#"+d.target).attr("data-x"))+parseFloat(d3.select("#"+d.target).attr("dx"));
+			var target_y = parseFloat(d3.select("#"+d.target).attr("data-y"))+parseFloat(d3.select("#"+d.target).attr("dy"));
+
+			return "M"+source_x+","+source_y+"L"+target_x+","+target_y+"Z";			
+		})
+		.attr("stroke","#000")
+		.classed("strong",function(d){ return ( d.Strength == "Strong") })
+		.classed("weak",function(d){ return ( d.Strength == "Weak") });
+	
+
+});
+
+
+</script>
+</body>
+</html>
