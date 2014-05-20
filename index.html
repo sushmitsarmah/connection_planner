@@ -4,7 +4,7 @@
 	<title>Connection Planner</title>
 	<style type="text/css">
 
-.block rect, .project_delivery rect {
+.block rect, .project_delivery rect, .legend rect {
 	stroke-width: 1px;
 	stroke:black;
 	fill:none;
@@ -84,8 +84,8 @@ d3.json("orgchart.json",function(data){
 
 
 	var margin = {top:40,bottom:40,right:40,left:40},
-		width = 1200 - margin.right - margin.left,
-		height = 570 - margin.top - margin.bottom;
+		width = 1340 - margin.right - margin.left,
+		height = 670 - margin.top - margin.bottom;
 
 	var block = {width:400,height:100};
 
@@ -191,7 +191,48 @@ d3.json("orgchart.json",function(data){
 		.attr("stroke","#000")
 		.classed("strong",function(d){ return ( d.Strength == "Strong") })
 		.classed("weak",function(d){ return ( d.Strength == "Weak") });
-	
+
+	//Legend
+
+	var legend_data = [{legend:"Decision Maker",definition:["A person with decision making","powers who can advance your goals"]},
+						{legend:"Navigator",definition:["A person who can guide you through the","organization"]},
+						{legend:"Champion",definition:["A person with leadership level influence","who wants you to win for their own","greater good reasons"]},]
+
+	var legend = svg.append("g")
+			.attr("class","legend")
+			.attr("transform","translate(900,400)");
+
+	legend
+		.append("text")
+		.attr("dy","20px")
+		.attr("dx",block.width/4)
+		.text("Legend");
+
+	legend.append("rect")
+		.attr("width",block.width)
+		.attr("height",block.height*2);
+
+	var legend_g = legend.selectAll("legend_elements")
+				.data(legend_data)
+				.enter().append("g")
+				.attr("class","legend_elements")
+				.attr("transform",function(d,i){ return "translate(10,"+(i*50+50)+")"; });
+
+	legend_g.append("text")
+		.text(function(d){ return d.legend})
+		.classed("decision-maker",function(d){ return d.legend == "Decision Maker"})
+		.classed("champion",function(d){ return (d.legend == "Champion") })
+		.classed("navigator",function(d){ return (d.legend == "Navigator") });
+
+	legend_g.selectAll(".definition")
+		.data(function(d){ return d.definition; })
+		.enter().append("text")
+		.attr("class","definition")
+		.attr("dx","110px")
+		.attr("dy",function(d,i){ return i*20})
+		.text(String);
+
+
 
 });
 
