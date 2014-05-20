@@ -4,7 +4,7 @@
 	<title>Connection Planner</title>
 	<style type="text/css">
 
-.block rect {
+.block rect, .project_delivery rect {
 	stroke-width: 1px;
 	stroke:black;
 	fill:none;
@@ -82,7 +82,6 @@ d3.json("orgchart.json",function(data){
 		return d;
 	});
 
-	console.log(data.Relationships);
 
 	var margin = {top:40,bottom:40,right:40,left:40},
 		width = 1200 - margin.right - margin.left,
@@ -95,6 +94,35 @@ d3.json("orgchart.json",function(data){
 				.attr("height",height+margin.top+margin.bottom)
 				.append("g")
 				.attr("transform","translate("+margin.left+","+margin.top+")");
+
+	var project_delivery = svg.append("g")
+				.attr("class","project_delivery");
+
+	project_delivery.append("rect")
+		.attr("width",block.width-100)
+		.attr("height",block.height);
+
+	project_delivery
+		.append("text")
+		.attr("dy","20px")
+		.attr("dx",(block.width-100)/4)
+		.text("Project Delivery Partners");
+
+	project_delivery
+		.append("text")
+		.attr("dy","40px")
+		.attr("dx",(block.width-100)/4 + 20)
+		.text("Project Participants");	
+
+	project_delivery.selectAll(".people_delivery")
+		.data(data.Partners)
+		.enter().append("text")
+		.attr("class","people")
+		.attr("id",function(d){ return d.id})
+		.attr("dx","20px")
+		.attr("dy",function(d,i){ return i*20 + 60})
+		.text(String);
+
 
 	var typeblock = svg.selectAll(".block")
 				.data(new_list)
@@ -153,7 +181,6 @@ d3.json("orgchart.json",function(data){
 		.data(data.Relationships)
 	.enter().append("path")
 		.attr("d",function(d){
-			console.log(d);
 			var source_x = parseFloat(d3.select("#"+d.source).attr("data-x"))+parseFloat(d3.select("#"+d.source).attr("dx"));
 			var source_y = parseFloat(d3.select("#"+d.source).attr("data-y"))+parseFloat(d3.select("#"+d.source).attr("dy"));
 			var target_x = parseFloat(d3.select("#"+d.target).attr("data-x"))+parseFloat(d3.select("#"+d.target).attr("dx"));
